@@ -21,7 +21,7 @@ library(stringr)
 
 ## Datenaggreagation
 
-Da ist eine spezielle Verwendungsweise des <- Operators in der letzten Zeile, die Idee hierfür stammt aus [diesem Artikel](https://stackoverflow.com/questions/56014722/how-can-i-assign-rownames-with-while-using-a-pipe).
+Da ist eine spezielle Verwendungsweise des <- Operators in einer der letzten Zeile, die Idee hierfür stammt aus [diesem Artikel](https://stackoverflow.com/questions/56014722/how-can-i-assign-rownames-with-while-using-a-pipe).
 
 ```{r Daten, echo=TRUE}
 Norm_Daten <- c(3.84, 3.99, 4.04,4.08,3.32, 2.00, 3.55, 2.68, 2.24, 2.96, 2.41 )
@@ -52,6 +52,7 @@ List_ED1 <- List_ED %>%
   mutate(Diff=UC_Daten-Norm_Daten)
 ```
 
+### T-Test
 Berechnung eines Signifikanz-Niveaus basierend auf dem angepassten t-Test von [Crawford und Howell (1998)](https://www.tandfonline.com/doi/abs/10.1076/clin.12.4.482.7241). Berichtet werden nur die p-Werte.
 ```{r t_test}
 List_ED1 <- List_ED1%>%

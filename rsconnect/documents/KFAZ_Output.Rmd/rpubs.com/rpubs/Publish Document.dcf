@@ -1,0 +1,11 @@
+name: Publish Document
+title:
+username:
+account: rpubs
+server: rpubs.com
+hostUrl: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/896870/6759c0e2f246476f84d5cf4c286be34e
+bundleId: https://api.rpubs.com/api/v1/document/896870/6759c0e2f246476f84d5cf4c286be34e
+url: http://rpubs.com/Theorien/896870
+when: 1651404700.33894
+lastSyncTime: 1651404700.33895
