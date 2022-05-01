@@ -1,0 +1,95 @@
+---
+title: "KFAZ"
+name: Urs Chalupny
+output:
+  html_document:
+    df_print: paged
+  word_document: default
+  html_notebook: default
+---
+```{r Libraries, include=FALSE}
+library(tidyr)
+library(tibble)
+library(tidyverse)
+library(matrixStats)
+library(flextable)
+library(ggplot2)
+library(stringr)
+```
+
+# KFAZ Auswertung für Modul 17
+
+## Datenaggreagation
+
+Da ist eine spezielle Verwendungsweise des <- Operators in der letzten Zeile, die Idee hierfür stammt aus [diesem Artikel](https://stackoverflow.com/questions/56014722/how-can-i-assign-rownames-with-while-using-a-pipe).
+
+```{r Daten, echo=TRUE}
+Norm_Daten <- c(3.84, 3.99, 4.04,4.08,3.32, 2.00, 3.55, 2.68, 2.24, 2.96, 2.41 )
+Norm_SD <- c(.82, .74, .86, .80, .97, .83, .87, .82, .98, .96, .98)
+Namen <- c("Handlungsspielraum", "Vielseitigkeit", "Ganzheitlichkeit", "Soziale Rückendeckung", "Zusammenarbeit", "Qualitative Arbeitsbelastung", "Quantitative Arbeitsbelastung", "Arbeitsunterbrechungen", "Umgebungsbelastungen", "Information und Mitsprache", "Betriebliche Leistungen")
+HS <- c(5,4,5)
+VS <- c(3,4,4)
+GH <- c(4,5, NA)
+SR <- c(4,5,4)
+ZU <- c(4,4,4)
+QL <- c(2,1, NA)
+QN <- c(3,3, NA)
+AU <- c(2,3, NA)
+UB <- c(1,2, NA)
+IM <- c(4,4, NA)
+BL <- c(3,3,NA)
+List_ED <- data.frame(HS, VS, GH, SR, ZU, QL, QN, AU, UB, IM, BL)
+List_ED <- t(List_ED)
+List_ED1 <- List_ED %>%
+   as.data.frame() %>%
+   mutate(UC_SD=round(rowSds(as.matrix(List_ED), na.rm = TRUE),2)) %>%
+   mutate(UC_Daten=round(rowMeans(across(c(1:3)),na.rm=TRUE),2)) %>%
+   select(-c(1:3)) %>%
+  relocate(UC_Daten) %>%
+   cbind(Norm_Daten, Norm_SD) %>%
+  `rownames<-`(Namen) %>%
+  rownames_to_column(var = "Dimension") %>%
+  mutate(Diff=UC_Daten-Norm_Daten)
+```
+
+Berechnung eines Signifikanz-Niveaus basierend auf dem angepassten t-Test von [Crawford und Howell (1998)](https://www.tandfonline.com/doi/abs/10.1076/clin.12.4.482.7241). Berichtet werden nur die p-Werte.
+```{r t_test}
+List_ED1 <- List_ED1%>%
+  rowwise() %>%
+  mutate(T_wert=Diff/Norm_SD*sqrt(189/188)) %>%
+  mutate(P=round(pt(abs(T_wert), 187, lower.tail=FALSE),2)) %>%
+  mutate(P=as.character(P))  %>%
+  mutate(P=str_replace(P, "0.", ".")) %>%
+  select(-T_wert)
+```
+
+## Datentabelle
+Verglichen werden die Normdaten aus der Studie von Prümper et al. (1995) und meinen Antworten des Fragebogens.
+*Zur Erstellung der Tabelle mittels flextable hat mir diese [Seite](https://epirhandbook.com/en/tables-for-presentation.html) wertvolle Unterstützung geliefert.*
+```{r Tabelle}
+Tabelle<- flextable(List_ED1)
+Tabelle %>%
+  add_header_row(
+    values = c("Dimension","Daten Herr C.","", "Normdaten", "","Differenz", "p-Wert")
+    ) %>%
+  set_header_labels(
+    Dimension = "",
+    UC_Daten = "Mw",
+    UC_SD = "SD",
+    Norm_Daten = "Mw",
+    Norm_SD = "SD",
+    Diff = "",
+    P = ""
+  ) %>%
+  merge_at(i = 1, j = 2:3, part = "header") %>%
+  merge_at(i = 1, j = 4:5, part = "header") %>%
+  merge_at(i = 1:2, j = 1, part = "header") %>%
+  merge_at(i = 1:2, j = 6, part = "header") %>%
+  merge_at(i = 1:2, j = 7, part = "header") %>%
+  align(align = "center", j = c(2:7), part = "all") %>%
+  valign(valign = "top", j=c(1,6,7), part = "header") %>%
+  italic(i=2, part = "header") %>%
+  italic(j=6, part = "header") %>%
+  italic(j=7, part = "header")
+```
+
